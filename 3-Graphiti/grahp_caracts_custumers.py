@@ -68,15 +68,13 @@ class FitnessTracker:
         try:
             async with self.driver.session() as session:
                 query = """
-                CREATE (a:Activity {
-                    user: $user,
-                    activity_id: $activity_id,
-                    activity_type: $activity_type,
-                    distance_km: $distance_km,
-                    duration_min: $duration_min,
-                    timestamp: $timestamp,
-                    created_at: datetime()
-                })
+                MERGE (a:Activity {activity_id: $activity_id})
+                SET a.user = $user,
+                    a.activity_type = $activity_type,
+                    a.distance_km = $distance_km,
+                    a.duration_min = $duration_min,
+                    a.timestamp = $timestamp,
+                    a.created_at = datetime()
                 """
                 await session.run(query, activity_data)
             
