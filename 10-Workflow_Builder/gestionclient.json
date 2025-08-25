@@ -1,0 +1,502 @@
+{
+    "name": "🔄 Gestion Clients - Hub Principal",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "lead-qualification",
+          "options": {}
+        },
+        "id": "webhook-lead-qualification",
+        "name": "📝 Nouveau Lead (Formulaire)",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [240, 300],
+        "webhookId": "lead-qualification-webhook"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Calcul du score de qualification lead\nconst data = $input.first().json;\n\nlet score = 0;\nconst weights = {\n  company_size: { 'startup': 2, 'pme': 5, 'enterprise': 10 },\n  budget: { 'low': 1, 'medium': 5, 'high': 10 },\n  urgency: { 'low': 1, 'medium': 3, 'high': 7 },\n  decision_maker: { 'yes': 8, 'influence': 4, 'no': 1 },\n  industry_match: { 'perfect': 10, 'good': 6, 'average': 3 }\n};\n\n// Calcul du score\nObject.keys(weights).forEach(criteria => {\n  if (data[criteria] && weights[criteria][data[criteria]]) {\n    score += weights[criteria][data[criteria]];\n  }\n});\n\n// Qualification\nlet qualification = 'cold';\nif (score >= 35) qualification = 'hot';\nelse if (score >= 20) qualification = 'warm';\n\n// Priorité\nlet priority = 'low';\nif (score >= 40) priority = 'high';\nelse if (score >= 25) priority = 'medium';\n\nreturn {\n  json: {\n    ...data,\n    lead_score: score,\n    qualification_status: qualification,\n    priority: priority,\n    qualified_at: new Date().toISOString(),\n    next_action: qualification === 'hot' ? 'immediate_contact' : \n                qualification === 'warm' ? 'nurture_sequence' : 'marketing_automation'\n  }\n};"
+        },
+        "id": "lead-scoring",
+        "name": "🎯 Calcul Score Lead",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [460, 300]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict"
+            },
+            "conditions": [
+              {
+                "id": "qualification-hot",
+                "leftValue": "={{ $json.qualification_status }}",
+                "rightValue": "hot",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              },
+              {
+                "id": "qualification-warm",
+                "leftValue": "={{ $json.qualification_status }}",
+                "rightValue": "warm",
+                "operator": {
+                  "type": "string",
+                  "operation": "equals"
+                }
+              }
+            ],
+            "combinator": "or"
+          },
+          "options": {}
+        },
+        "id": "qualification-switch",
+        "name": "🔀 Routage par Qualification",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3,
+        "position": [680, 300]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "{{ $vars.CRM_API_URL }}/leads",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ $vars.CRM_API_TOKEN }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "name",
+                "value": "={{ $json.full_name }}"
+              },
+              {
+                "name": "email",
+                "value": "={{ $json.email }}"
+              },
+              {
+                "name": "company",
+                "value": "={{ $json.company }}"
+              },
+              {
+                "name": "phone",
+                "value": "={{ $json.phone }}"
+              },
+              {
+                "name": "source",
+                "value": "website_form"
+              },
+              {
+                "name": "lead_score",
+                "value": "={{ $json.lead_score }}"
+              },
+              {
+                "name": "qualification_status",
+                "value": "={{ $json.qualification_status }}"
+              },
+              {
+                "name": "priority",
+                "value": "={{ $json.priority }}"
+              },
+              {
+                "name": "next_action",
+                "value": "={{ $json.next_action }}"
+              },
+              {
+                "name": "created_at",
+                "value": "={{ $json.qualified_at }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "crm-create-lead",
+        "name": "📊 Création Lead CRM",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [900, 200]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Attribution automatique du commercial\nconst data = $input.first().json;\nconst leadData = data.body || data;\n\n// Règles d'attribution par secteur et priorité\nconst salesAssignment = {\n  'tech': {\n    'high': 'commercial_tech_senior',\n    'medium': 'commercial_tech_junior',\n    'low': 'marketing_automation'\n  },\n  'retail': {\n    'high': 'commercial_retail_senior', \n    'medium': 'commercial_retail_junior',\n    'low': 'marketing_automation'\n  },\n  'finance': {\n    'high': 'commercial_finance_senior',\n    'medium': 'commercial_finance_junior', \n    'low': 'marketing_automation'\n  },\n  'default': {\n    'high': 'commercial_general_senior',\n    'medium': 'commercial_general_junior',\n    'low': 'marketing_automation'\n  }\n};\n\nconst industry = leadData.industry || 'default';\nconst priority = leadData.priority || 'low';\nconst assignedTo = salesAssignment[industry]?.[priority] || salesAssignment['default'][priority];\n\n// Calcul du SLA (temps de réponse attendu)\nconst slaHours = {\n  'high': 2,    // 2 heures\n  'medium': 24, // 1 jour  \n  'low': 72     // 3 jours\n};\n\nconst responseDeadline = new Date();\nresponseDeadline.setHours(responseDeadline.getHours() + slaHours[priority]);\n\nreturn {\n  json: {\n    ...leadData,\n    assigned_to: assignedTo,\n    assignment_date: new Date().toISOString(),\n    response_deadline: responseDeadline.toISOString(),\n    sla_hours: slaHours[priority],\n    assignment_reason: `Industry: ${industry}, Priority: ${priority}`\n  }\n};"
+        },
+        "id": "sales-assignment", 
+        "name": "👤 Attribution Commercial",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [1120, 200]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "{{ $vars.SLACK_WEBHOOK_SALES }}",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "text",
+                "value": "🎯 *Nouveau Lead Qualifié Assigné*"
+              },
+              {
+                "name": "blocks",
+                "value": "=[\n  {\n    \"type\": \"header\",\n    \"text\": {\n      \"type\": \"plain_text\",\n      \"text\": \"🎯 Nouveau Lead Qualifié\"\n    }\n  },\n  {\n    \"type\": \"section\",\n    \"fields\": [\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Nom:* {{ $json.full_name || $json.name }}\"\n      },\n      {\n        \"type\": \"mrkdwn\", \n        \"text\": \"*Email:* {{ $json.email }}\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Entreprise:* {{ $json.company }}\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Score:* {{ $json.lead_score }}/50\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Qualification:* {{ $json.qualification_status.toUpperCase() }}\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Priorité:* {{ $json.priority.toUpperCase() }}\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Assigné à:* {{ $json.assigned_to }}\"\n      },\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*SLA Réponse:* {{ $json.sla_hours }}h\"\n      }\n    ]\n  },\n  {\n    \"type\": \"context\",\n    \"elements\": [\n      {\n        \"type\": \"mrkdwn\",\n        \"text\": \"Deadline réponse: {{ $json.response_deadline }}\"\n      }\n    ]\n  }\n]"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "slack-notification",
+        "name": "💬 Notification Slack",
+        "type": "n8n-nodes-base.httpRequest", 
+        "typeVersion": 4,
+        "position": [1340, 200]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "value": "0 */6 * * *"
+              }
+            ]
+          }
+        },
+        "id": "cron-onboarding-check",
+        "name": "⏰ Check Nouveaux Clients",
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1,
+        "position": [240, 600]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "{{ $vars.CRM_API_URL }}/clients",
+          "authentication": "genericCredentialType", 
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ $vars.CRM_API_TOKEN }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "status",
+                "value": "new_client"
+              },
+              {
+                "name": "onboarding_status", 
+                "value": "not_started"
+              },
+              {
+                "name": "created_since",
+                "value": "={{ $now.minus({hours: 6}).toISO() }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fetch-new-clients",
+        "name": "👥 Récup Nouveaux Clients",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4, 
+        "position": [460, 600]
+      },
+      {
+        "parameters": {},
+        "id": "split-clients",
+        "name": "🔄 Split Clients",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [680, 600]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Génération séquence emails onboarding personnalisée\nconst client = $input.first().json;\n\nconst emailSequence = [\n  {\n    delay_hours: 0,\n    template: 'welcome_email',\n    subject: `Bienvenue ${client.first_name} ! Votre onboarding commence`,\n    variables: {\n      client_name: client.first_name,\n      company: client.company,\n      account_manager: client.assigned_account_manager,\n      onboarding_link: `${process.env.PORTAL_URL}/onboarding/${client.id}`\n    }\n  },\n  {\n    delay_hours: 24,\n    template: 'setup_guide',\n    subject: 'Étape 1 : Configuration de votre compte',\n    variables: {\n      setup_checklist: [\n        'Vérification profil entreprise',\n        'Configuration préférences',\n        'Import données existantes',\n        'Paramétrage utilisateurs'\n      ]\n    }\n  },\n  {\n    delay_hours: 72,\n    template: 'training_invitation', \n    subject: 'Votre formation personnalisée est prête !',\n    variables: {\n      training_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),\n      training_type: client.package_type === 'enterprise' ? 'advanced' : 'standard',\n      calendar_link: `${process.env.CALENDAR_URL}/book-training/${client.id}`\n    }\n  },\n  {\n    delay_hours: 120,\n    template: 'progress_check',\n    subject: 'Comment se passe votre prise en main ?',\n    variables: {\n      progress_survey: `${process.env.SURVEY_URL}/onboarding-feedback/${client.id}`,\n      support_contact: client.assigned_account_manager\n    }\n  }\n];\n\nreturn emailSequence.map(email => ({\n  json: {\n    client_id: client.id,\n    client_email: client.email,\n    client_name: client.first_name,\n    ...email,\n    scheduled_for: new Date(Date.now() + email.delay_hours * 60 * 60 * 1000).toISOString()\n  }\n}));"
+        },
+        "id": "generate-email-sequence",
+        "name": "📧 Génération Séquence Emails",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [900, 600]
+      },
+      {
+        "parameters": {
+          "mode": "combine",
+          "combineBy": "combineAll",
+          "options": {}
+        },
+        "id": "batch-emails",
+        "name": "📦 Batch Emails",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 2.1,
+        "position": [1120, 600]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "{{ $vars.EMAIL_SERVICE_URL }}/schedule-sequence",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth", 
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ $vars.EMAIL_API_TOKEN }}"
+              },
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "sequence_id",
+                "value": "onboarding_{{ $json.client_id }}"
+              },
+              {
+                "name": "client_id", 
+                "value": "={{ $json.client_id }}"
+              },
+              {
+                "name": "emails",
+                "value": "={{ $json }}"
+              },
+              {
+                "name": "sequence_type",
+                "value": "client_onboarding"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "schedule-email-sequence",
+        "name": "⏰ Programmer Séquence",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [1340, 600]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression", 
+                "value": "0 10 * * *"
+              }
+            ]
+          }
+        },
+        "id": "cron-satisfaction-survey",
+        "name": "⏰ Surveys Satisfaction (10h)",
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1,
+        "position": [240, 900]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "{{ $vars.CRM_API_URL }}/clients/completed-services",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization", 
+                "value": "Bearer {{ $vars.CRM_API_TOKEN }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "completed_since",
+                "value": "={{ $now.minus({days: 1}).toISO() }}"
+              },
+              {
+                "name": "survey_sent",
+                "value": "false"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fetch-completed-services",
+        "name": "✅ Services Terminés Hier",
+        "type": "n8n-nodes-base.httpRequest", 
+        "typeVersion": 4,
+        "position": [460, 900]
+      },
+      {
+        "parameters": {},
+        "id": "split-services",
+        "name": "🔄 Split Services",
+        "type": "n8n-nodes-base.splitInBatches", 
+        "typeVersion": 3,
+        "position": [680, 900]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "{{ $vars.SURVEY_PLATFORM_URL }}/create-survey",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ $vars.SURVEY_API_TOKEN }}"
+              },
+              {
+                "name": "Content-Type", 
+                "value": "application/json"
+              }
+            ]
+          },
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "client_id",
+                "value": "={{ $json.client_id }}"
+              },
+              {
+                "name": "service_id",
+                "value": "={{ $json.service_id }}"
+              },
+              {
+                "name": "survey_type",
+                "value": "post_service_satisfaction"
+              },
+              {
+                "name": "questions",
+                "value": "=[\n  {\n    \"id\": \"overall_satisfaction\",\n    \"type\": \"rating\",\n    \"question\": \"Comment évaluez-vous globalement notre service ?\",\n    \"scale\": {\"min\": 1, \"max\": 5},\n    \"required\": true\n  },\n  {\n    \"id\": \"service_quality\", \n    \"type\": \"rating\",\n    \"question\": \"Qualité du service rendu ?\",\n    \"scale\": {\"min\": 1, \"max\": 5},\n    \"required\": true\n  },\n  {\n    \"id\": \"team_professionalism\",\n    \"type\": \"rating\", \n    \"question\": \"Professionnalisme de l'équipe ?\",\n    \"scale\": {\"min\": 1, \"max\": 5},\n    \"required\": true\n  },\n  {\n    \"id\": \"timeline_respect\",\n    \"type\": \"rating\",\n    \"question\": \"Respect des délais ?\", \n    \"scale\": {\"min\": 1, \"max\": 5},\n    \"required\": true\n  },\n  {\n    \"id\": \"communication\",\n    \"type\": \"rating\",\n    \"question\": \"Qualité de la communication ?\",\n    \"scale\": {\"min\": 1, \"max\": 5},\n    \"required\": true\n  },\n  {\n    \"id\": \"recommendation\", \n    \"type\": \"nps\",\n    \"question\": \"Recommanderiez-vous notre entreprise ?\",\n    \"required\": true\n  },\n  {\n    \"id\": \"feedback_text\",\n    \"type\": \"text\",\n    \"question\": \"Commentaires ou suggestions d'amélioration ?\",\n    \"required\": false\n  },\n  {\n    \"id\": \"future_needs\",\n    \"type\": \"multiple_choice\", \n    \"question\": \"Avez-vous d'autres besoins à venir ?\",\n    \"options\": [\"Oui, dans les 3 mois\", \"Oui, dans l'année\", \"Peut-être\", \"Non\"],\n    \"required\": false\n  }\n]"
+              },
+              {
+                "name": "client_info",
+                "value": "={\n  \"name\": \"{{ $json.client_name }}\",\n  \"email\": \"{{ $json.client_email }}\",\n  \"company\": \"{{ $json.company }}\",\n  \"service_completed\": \"{{ $json.service_name }}\",\n  \"completion_date\": \"{{ $json.completion_date }}\"\n}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "create-satisfaction-survey",
+        "name": "📊 Création Survey",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [900, 900]
+      },
+      {
+        "parameters": {
+          "authentication": "oAuth2",
+          "select": "channel",
+          "channelId": {
+            "__rl": true,
+            "value": "C1234567890",
+            "mode": "list",
+            "cachedResultName": "general"
+          },
+          "text": "=📊 **Survey Satisfaction Envoyé**\n\n*Client:* {{ $json.client_name }} ({{ $json.company }})\n*Service:* {{ $json.service_name }}\n*Survey Link:* {{ $json.survey_link }}\n*Deadline:* 7 jours\n\n_Auto-relance programmée dans 3 jours si pas de réponse_",
+          "otherOptions": {}
+        },
+        "id": "slack-survey-notification",
+        "name": "💬 Notif Survey Slack",
+        "type": "n8n-nodes-base.slack",
+        "typeVersion": 2.1,
+        "position": [1120, 900]
+      },
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "cronExpression",
+                "value": "0 9 * * *"
+              }
+            ]
+          }
+        },
+        "id": "cron-invoice-check",
+        "name": "⏰ Check Factures (9h)",
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1,
+        "position": [240, 1200]
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "{{ $vars.BILLING_API_URL }}/invoices/overdue",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "Bearer {{ $vars.BILLING_API_TOKEN }}"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "status",
+                "value": "overdue"
+              },
+              {
+                "name": "include_client_data",
+                "value": "true"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fetch-overdue-invoices",
+        "name": "🧾 Factures Échues",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [460, 1200]
+      },
+      {
+        "parameters": {},
+        "id": "split-overdue-invoices",
+        "name": "🔄 Split Factures",
+        "type": "n8n-nodes-base.splitInBatches",
+        "typeVersion": 3,
+        "position": [680, 1200]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Logique de relance progressive des factures\nconst invoice = $input.first().json;\nconst today = new Date();\nconst dueDate = new Date(invoice.due_date);\nconst daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));\n\n// Définir le niveau de relance selon les jours de retard\nlet reminderLevel = 'none';\nlet emailTemplate = '';\nlet escalation = false;\nlet accountAction = 'none';\n\nif (daysOverdue >= 1 && daysOverdue <= 7) {\n  reminderLevel = 'gentle';\n  emailTemplate = 'gentle_reminder';\n} else if (daysOverdue >= 8 && daysOverdue <= 15) {\n  reminderLevel = 'firm';\n  emailTemplate = 'firm_reminder'; \n} else if (daysOverdue >= 16 && daysOverdue <= 30) {\n  reminderLevel = 'urgent';\n  emailTemplate = 'urgent_reminder';\n  escalation = true; // Notification comptable\n} else if (daysOverdue > 30) {\n  reminderLevel = 'final';\n  emailTemplate = 'final_notice';\n  escalation = true;\n  accountAction = 'suspend'; // Suspension compte\n}\n\n// Calcul des pénalités si applicable\nlet penalty = 0;\nif (daysOverdue > 15) {\n  penalty = invoice.amount * 0.02; // 2% de pénalité\n}\n\n// Historique des relances\nconst reminderHistory = invoice.reminder_history || [];\nconst lastReminder = reminderHistory[reminderHistory.length - 1];\n\n// Vérifier si on doit envoyer une relance (pas plus d'une par jour)\nlet shouldSendReminder = true;\nif (lastReminder) {\n  const lastReminderDate = new Date(lastReminder.sent_date);\n  const hoursSinceLastReminder = (today - lastReminderDate) / (1000 * 60 * 60);\n  if (hoursSinceLastReminder < 24) {\n    shouldSendReminder = false;\n  }\n}\n\nreturn {\n  json: {\n    ...invoice,\n    days_overdue: daysOverdue,\n    reminder_level: reminderLevel,\n    email_template: emailTemplate,\n    should_send_reminder: shouldSendReminder,\n    escalation_required: escalation,\n    account_action: accountAction,\n    penalty_amount: penalty,\n    total_amount_due: invoice.amount + penalty,\n    next_escalation_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),\n    reminder_count: reminderHistory.length\n  }\n};"
+        }}]}

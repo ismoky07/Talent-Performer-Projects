@@ -1,0 +1,248 @@
+{
+    "displayName": "Social Media Analytics Automation",
+    "trigger": {
+      "name": "daily_trigger",
+      "displayName": "Daily Analytics Collection",
+      "type": "@activepieces/piece-schedule",
+      "settings": {
+        "cronExpression": "0 9 * * *",
+        "timezone": "Europe/Paris"
+      }
+    },
+    "actions": [
+      {
+        "name": "init_analytics_session",
+        "displayName": "Initialize Analytics Session",
+        "type": "@activepieces/piece-code",
+        "settings": {
+          "sourceCode": "export const code = async (inputs) => {\n  const today = new Date().toISOString().split('T')[0];\n  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];\n  \n  return {\n    sessionId: `analytics_${Date.now()}`,\n    dateRange: {\n      start: yesterday,\n      end: today\n    },\n    timestamp: new Date().toISOString(),\n    platforms: ['facebook', 'twitter', 'instagram', 'linkedin'],\n    metrics: {\n      engagement: [],\n      reach: [],\n      clicks: [],\n      conversions: []\n    }\n  };\n};"
+        },
+        "nextAction": "fetch_facebook_data"
+      },
+      {
+        "name": "fetch_facebook_data",
+        "displayName": "Fetch Facebook Analytics",
+        "type": "@activepieces/piece-http",
+        "settings": {
+          "method": "GET",
+          "url": "https://graph.facebook.com/v18.0/{{connections.facebook.page_id}}/insights",
+          "headers": {
+            "Authorization": "Bearer {{connections.facebook.access_token}}"
+          },
+          "queryParams": {
+            "metric": "page_impressions,page_engaged_users,page_fans,page_post_engagements",
+            "since": "{{init_analytics_session.dateRange.start}}",
+            "until": "{{init_analytics_session.dateRange.end}}"
+          }
+        },
+        "nextAction": "fetch_twitter_data"
+      },
+      {
+        "name": "fetch_twitter_data",
+        "displayName": "Fetch Twitter Analytics",
+        "type": "@activepieces/piece-http",
+        "settings": {
+          "method": "GET",
+          "url": "https://api.twitter.com/2/users/{{connections.twitter.user_id}}/tweets",
+          "headers": {
+            "Authorization": "Bearer {{connections.twitter.bearer_token}}"
+          },
+          "queryParams": {
+            "tweet.fields": "public_metrics,created_at,context_annotations",
+            "start_time": "{{init_analytics_session.dateRange.start}}T00:00:00Z",
+            "end_time": "{{init_analytics_session.dateRange.end}}T23:59:59Z",
+            "max_results": "100"
+          }
+        },
+        "nextAction": "fetch_instagram_data"
+      },
+      {
+        "name": "fetch_instagram_data",
+        "displayName": "Fetch Instagram Analytics",
+        "type": "@activepieces/pieces-custom/instagram-analytics",
+        "settings": {
+          "business_account_id": "{{connections.instagram.business_id}}",
+          "access_token": "{{connections.instagram.access_token}}",
+          "date_range": {
+            "start": "{{init_analytics_session.dateRange.start}}",
+            "end": "{{init_analytics_session.dateRange.end}}"
+          },
+          "metrics": ["impressions", "reach", "profile_views", "website_clicks", "follower_count"]
+        },
+        "nextAction": "fetch_linkedin_data"
+      },
+      {
+        "name": "fetch_linkedin_data",
+        "displayName": "Fetch LinkedIn Analytics",
+        "type": "@activepieces/piece-http",
+        "settings": {
+          "method": "GET",
+          "url": "https://api.linkedin.com/v2/organizationalEntityShareStatistics",
+          "headers": {
+            "Authorization": "Bearer {{connections.linkedin.access_token}}",
+            "X-Restli-Protocol-Version": "2.0.0"
+          },
+          "queryParams": {
+            "q": "organizationalEntity",
+            "organizationalEntity": "{{connections.linkedin.organization_id}}",
+            "timeIntervals.timeGranularityType": "DAY",
+            "timeIntervals.timeRange.start": "{{init_analytics_session.dateRange.start}}",
+            "timeIntervals.timeRange.end": "{{init_analytics_session.dateRange.end}}"
+          }
+        },
+        "nextAction": "transform_social_data"
+      },
+      {
+        "name": "transform_social_data",
+        "displayName": "Transform & Normalize Data",
+        "type": "@activepieces/piece-code",
+        "settings": {
+          "sourceCode": "export const code = async (inputs) => {\n  const { fetch_facebook_data, fetch_twitter_data, fetch_instagram_data, fetch_linkedin_data } = inputs;\n  \n  // Facebook transformation\n  const facebookMetrics = {\n    platform: 'facebook',\n    impressions: fetch_facebook_data.body?.data?.[0]?.values?.[0]?.value || 0,\n    engagement: fetch_facebook_data.body?.data?.[1]?.values?.[0]?.value || 0,\n    followers: fetch_facebook_data.body?.data?.[2]?.values?.[0]?.value || 0,\n    posts: fetch_facebook_data.body?.data?.[3]?.values?.[0]?.value || 0\n  };\n  \n  // Twitter transformation\n  const twitterMetrics = {\n    platform: 'twitter',\n    impressions: fetch_twitter_data.body?.data?.reduce((sum, tweet) => sum + (tweet.public_metrics?.impression_count || 0), 0) || 0,\n    engagement: fetch_twitter_data.body?.data?.reduce((sum, tweet) => sum + (tweet.public_metrics?.like_count || 0) + (tweet.public_metrics?.retweet_count || 0) + (tweet.public_metrics?.reply_count || 0), 0) || 0,\n    posts: fetch_twitter_data.body?.meta?.result_count || 0\n  };\n  \n  // Instagram transformation\n  const instagramMetrics = {\n    platform: 'instagram',\n    impressions: fetch_instagram_data.impressions || 0,\n    reach: fetch_instagram_data.reach || 0,\n    profile_views: fetch_instagram_data.profile_views || 0,\n    website_clicks: fetch_instagram_data.website_clicks || 0,\n    followers: fetch_instagram_data.follower_count || 0\n  };\n  \n  // LinkedIn transformation\n  const linkedinMetrics = {\n    platform: 'linkedin',\n    impressions: fetch_linkedin_data.body?.elements?.[0]?.totalShareStatistics?.impressionCount || 0,\n    clicks: fetch_linkedin_data.body?.elements?.[0]?.totalShareStatistics?.clickCount || 0,\n    engagement: fetch_linkedin_data.body?.elements?.[0]?.totalShareStatistics?.engagement || 0\n  };\n  \n  const consolidatedData = {\n    sessionId: inputs.init_analytics_session.sessionId,\n    timestamp: new Date().toISOString(),\n    dateRange: inputs.init_analytics_session.dateRange,\n    platforms: {\n      facebook: facebookMetrics,\n      twitter: twitterMetrics,\n      instagram: instagramMetrics,\n      linkedin: linkedinMetrics\n    },\n    totals: {\n      impressions: facebookMetrics.impressions + twitterMetrics.impressions + instagramMetrics.impressions + linkedinMetrics.impressions,\n      engagement: facebookMetrics.engagement + twitterMetrics.engagement + instagramMetrics.reach + linkedinMetrics.engagement,\n      total_followers: facebookMetrics.followers + instagramMetrics.followers\n    },\n    performance_score: 0 // Calculé dans l'étape suivante\n  };\n  \n  // Calcul du score de performance\n  consolidatedData.performance_score = Math.min(100, Math.round(\n    (consolidatedData.totals.engagement / Math.max(consolidatedData.totals.impressions, 1)) * 1000\n  ));\n  \n  return consolidatedData;\n};"
+        },
+        "nextAction": "sentiment_analysis"
+      },
+      {
+        "name": "sentiment_analysis",
+        "displayName": "Analyze Social Sentiment",
+        "type": "@activepieces/pieces-custom/sentiment-analyzer",
+        "settings": {
+          "text_sources": [
+            "{{fetch_twitter_data.body.data}}",
+            "{{fetch_facebook_data.body.posts}}"
+          ],
+          "analysis_type": "comprehensive",
+          "language": "auto-detect"
+        },
+        "nextAction": "calculate_kpis"
+      },
+      {
+        "name": "calculate_kpis",
+        "displayName": "Calculate Advanced KPIs",
+        "type": "@activepieces/piece-code",
+        "settings": {
+          "sourceCode": "export const code = async (inputs) => {\n  const data = inputs.transform_social_data;\n  const sentiment = inputs.sentiment_analysis;\n  \n  // Calculs KPI avancés\n  const kpis = {\n    engagement_rate: {\n      facebook: data.platforms.facebook.engagement / Math.max(data.platforms.facebook.impressions, 1),\n      twitter: data.platforms.twitter.engagement / Math.max(data.platforms.twitter.impressions, 1),\n      instagram: data.platforms.instagram.reach / Math.max(data.platforms.instagram.impressions, 1),\n      linkedin: data.platforms.linkedin.engagement / Math.max(data.platforms.linkedin.impressions, 1)\n    },\n    reach_efficiency: {\n      cost_per_impression: data.totals.impressions > 0 ? 100 / data.totals.impressions : 0,\n      organic_reach_score: data.performance_score\n    },\n    content_performance: {\n      sentiment_score: sentiment.overall_score || 0.5,\n      sentiment_distribution: sentiment.distribution || { positive: 0.4, neutral: 0.4, negative: 0.2 },\n      viral_potential: data.platforms.twitter.engagement / Math.max(data.platforms.twitter.posts, 1)\n    },\n    growth_indicators: {\n      follower_velocity: data.totals.total_followers / 30, // Estimation mensuelle\n      engagement_velocity: data.totals.engagement / data.platforms.facebook.posts || 1\n    }\n  };\n  \n  // Détection d'anomalies\n  const anomalies = [];\n  \n  if (data.performance_score < 10) {\n    anomalies.push({ type: 'LOW_PERFORMANCE', message: 'Performance globale faible', severity: 'high' });\n  }\n  \n  if (sentiment.overall_score < 0.3) {\n    anomalies.push({ type: 'NEGATIVE_SENTIMENT', message: 'Sentiment négatif détecté', severity: 'medium' });\n  }\n  \n  if (data.totals.impressions < 1000) {\n    anomalies.push({ type: 'LOW_REACH', message: 'Portée insuffisante', severity: 'medium' });\n  }\n  \n  return {\n    ...data,\n    kpis,\n    anomalies,\n    recommendations: generateRecommendations(kpis, anomalies),\n    report_ready: true\n  };\n  \n  function generateRecommendations(kpis, anomalies) {\n    const recommendations = [];\n    \n    if (kpis.engagement_rate.instagram > kpis.engagement_rate.facebook) {\n      recommendations.push('Concentrez plus d\\'efforts sur Instagram (meilleur engagement)');\n    }\n    \n    if (kpis.content_performance.sentiment_score < 0.4) {\n      recommendations.push('Améliorer le tone of voice et la qualité du contenu');\n    }\n    \n    if (kpis.reach_efficiency.organic_reach_score < 20) {\n      recommendations.push('Optimiser les hashtags et horaires de publication');\n    }\n    \n    return recommendations;\n  }\n};"
+        },
+        "nextAction": "performance_alerts_branch"
+      },
+      {
+        "name": "performance_alerts_branch",
+        "displayName": "Performance Alerts Decision",
+        "type": "@activepieces/piece-branch",
+        "settings": {
+          "conditions": [
+            {
+              "firstValue": "{{calculate_kpis.performance_score}}",
+              "secondValue": 80,
+              "operator": "GREATER_THAN",
+              "caseSensitive": false
+            }
+          ]
+        },
+        "onSuccessAction": "success_alert_slack",
+        "onFailureAction": "check_critical_issues"
+      },
+      {
+        "name": "success_alert_slack",
+        "displayName": "High Performance Alert",
+        "type": "@activepieces/piece-slack",
+        "settings": {
+          "webhook_url": "{{connections.slack.webhook_url}}",
+          "channel": "#marketing",
+          "username": "Social Analytics Bot",
+          "text": "🎉 *Excellente performance sociale aujourd'hui !*\n\n📊 Score: {{calculate_kpis.performance_score}}/100\n📈 Engagement total: {{calculate_kpis.totals.engagement}}\n👥 Portée: {{calculate_kpis.totals.impressions}}\n\n*Top Platform:* {{calculate_kpis.best_platform}}\n\n🔗 [Voir le rapport complet]({{env.DASHBOARD_URL}})",
+          "icon_emoji": ":chart_with_upwards_trend:"
+        },
+        "nextAction": "update_dashboard_sheets"
+      },
+      {
+        "name": "check_critical_issues",
+        "displayName": "Check for Critical Issues",
+        "type": "@activepieces/piece-branch",
+        "settings": {
+          "conditions": [
+            {
+              "firstValue": "{{calculate_kpis.anomalies}}",
+              "secondValue": "[]",
+              "operator": "NOT_EQUAL",
+              "caseSensitive": false
+            }
+          ]
+        },
+        "onSuccessAction": "critical_alert_email",
+        "onFailureAction": "update_dashboard_sheets"
+      },
+      {
+        "name": "critical_alert_email",
+        "displayName": "Critical Issues Email Alert",
+        "type": "@activepieces/piece-gmail",
+        "settings": {
+          "to": ["marketing@company.com", "social-media@company.com"],
+          "subject": "⚠️ Alerte Performance Réseaux Sociaux - {{calculate_kpis.dateRange.start}}",
+          "body": "Bonjour,\n\nNous avons détecté des problèmes de performance sur nos réseaux sociaux :\n\n**Score Performance:** {{calculate_kpis.performance_score}}/100\n\n**Anomalies détectées:**\n{{#each calculate_kpis.anomalies}}\n• {{this.message}} (Sévérité: {{this.severity}})\n{{/each}}\n\n**Recommandations:**\n{{#each calculate_kpis.recommendations}}\n• {{this}}\n{{/each}}\n\n**Métriques détaillées:**\n- Impressions totales: {{calculate_kpis.totals.impressions}}\n- Engagement total: {{calculate_kpis.totals.engagement}}\n- Score sentiment: {{calculate_kpis.kpis.content_performance.sentiment_score}}\n\nConsultez le dashboard pour plus de détails.\n\nCordialement,\nBot Analytics"
+        },
+        "nextAction": "update_dashboard_sheets"
+      },
+      {
+        "name": "update_dashboard_sheets",
+        "displayName": "Update Analytics Dashboard",
+        "type": "@activepieces/piece-google-sheets",
+        "settings": {
+          "spreadsheet_id": "{{connections.google_sheets.analytics_sheet_id}}",
+          "worksheet_name": "Daily_Analytics",
+          "values": [
+            [
+              "{{calculate_kpis.dateRange.start}}",
+              "{{calculate_kpis.platforms.facebook.impressions}}",
+              "{{calculate_kpis.platforms.facebook.engagement}}",
+              "{{calculate_kpis.platforms.twitter.impressions}}",
+              "{{calculate_kpis.platforms.twitter.engagement}}",
+              "{{calculate_kpis.platforms.instagram.impressions}}",
+              "{{calculate_kpis.platforms.instagram.reach}}",
+              "{{calculate_kpis.platforms.linkedin.impressions}}",
+              "{{calculate_kpis.platforms.linkedin.engagement}}",
+              "{{calculate_kpis.totals.impressions}}",
+              "{{calculate_kpis.totals.engagement}}",
+              "{{calculate_kpis.performance_score}}",
+              "{{calculate_kpis.kpis.content_performance.sentiment_score}}",
+              "{{calculate_kpis.anomalies.length}}"
+            ]
+          ],
+          "range": "A:N",
+          "append": true
+        },
+        "nextAction": "generate_pdf_report"
+      },
+      {
+        "name": "generate_pdf_report",
+        "displayName": "Generate Comprehensive Report",
+        "type": "@activepieces/piece-code",
+        "settings": {
+          "sourceCode": "export const code = async (inputs) => {\n  const data = inputs.calculate_kpis;\n  const timestamp = new Date().toLocaleDateString('fr-FR');\n  \n  // Génération du rapport HTML\n  const htmlReport = `\n    <!DOCTYPE html>\n    <html>\n    <head>\n      <meta charset=\"utf-8\">\n      <title>Rapport Analytics Réseaux Sociaux - ${timestamp}</title>\n      <style>\n        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }\n        .header { text-align: center; border-bottom: 3px solid #4CAF50; padding-bottom: 20px; margin-bottom: 30px; }\n        .metric-card { background: #f8f9fa; padding: 20px; margin: 15px 0; border-radius: 8px; border-left: 4px solid #007bff; }\n        .platform-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }\n        .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }\n        .alert { padding: 15px; margin: 10px 0; border-radius: 5px; }\n        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; }\n        .alert-warning { background: #fff3cd; border: 1px solid #ffeaa7; }\n        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; }\n        .recommendations { background: #e7f3ff; padding: 20px; border-radius: 8px; }\n        table { width: 100%; border-collapse: collapse; margin: 20px 0; }\n        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }\n        th { background-color: #f2f2f2; font-weight: bold; }\n        .score-high { color: #28a745; font-weight: bold; }\n        .score-medium { color: #ffc107; font-weight: bold; }\n        .score-low { color: #dc3545; font-weight: bold; }\n      </style>\n    </head>\n    <body>\n      <div class=\"header\">\n        <h1>📊 Rapport Analytics Réseaux Sociaux</h1>\n        <p>Période: ${data.dateRange.start} - Généré le ${timestamp}</p>\n      </div>\n      \n      <div class=\"metric-card\">\n        <h2>🎯 Performance Globale</h2>\n        <div class=\"kpi-grid\">\n          <div>\n            <h3>Score Global: <span class=\"${data.performance_score >= 70 ? 'score-high' : data.performance_score >= 40 ? 'score-medium' : 'score-low'}\">${data.performance_score}/100</span></h3>\n            <p><strong>Impressions Totales:</strong> ${data.totals.impressions.toLocaleString()}</p>\n            <p><strong>Engagement Total:</strong> ${data.totals.engagement.toLocaleString()}</p>\n          </div>\n          <div>\n            <p><strong>Score Sentiment:</strong> ${(data.kpis.content_performance.sentiment_score * 100).toFixed(1)}%</p>\n            <p><strong>Followers Totaux:</strong> ${data.totals.total_followers.toLocaleString()}</p>\n          </div>\n        </div>\n      </div>\n      \n      <h2>📱 Performance par Plateforme</h2>\n      \n      <div class=\"platform-section\">\n        <h3>Facebook</h3>\n        <table>\n          <tr><td>Impressions</td><td>${data.platforms.facebook.impressions.toLocaleString()}</td></tr>\n          <tr><td>Engagement</td><td>${data.platforms.facebook.engagement.toLocaleString()}</td></tr>\n          <tr><td>Taux d'Engagement</td><td>${(data.kpis.engagement_rate.facebook * 100).toFixed(2)}%</td></tr>\n        </table>\n      </div>\n      \n      <div class=\"platform-section\">\n        <h3>Twitter</h3>\n        <table>\n          <tr><td>Impressions</td><td>${data.platforms.twitter.impressions.toLocaleString()}</td></tr>\n          <tr><td>Engagement</td><td>${data.platforms.twitter.engagement.toLocaleString()}</td></tr>\n          <tr><td>Posts</td><td>${data.platforms.twitter.posts}</td></tr>\n        </table>\n      </div>\n      \n      <div class=\"platform-section\">\n        <h3>Instagram</h3>\n        <table>\n          <tr><td>Impressions</td><td>${data.platforms.instagram.impressions.toLocaleString()}</td></tr>\n          <tr><td>Portée</td><td>${data.platforms.instagram.reach.toLocaleString()}</td></tr>\n          <tr><td>Vues Profil</td><td>${data.platforms.instagram.profile_views.toLocaleString()}</td></tr>\n          <tr><td>Clics Site Web</td><td>${data.platforms.instagram.website_clicks}</td></tr>\n        </table>\n      </div>\n      \n      <div class=\"platform-section\">\n        <h3>LinkedIn</h3>\n        <table>\n          <tr><td>Impressions</td><td>${data.platforms.linkedin.impressions.toLocaleString()}</td></tr>\n          <tr><td>Clics</td><td>${data.platforms.linkedin.clicks}</td></tr>\n          <tr><td>Engagement</td><td>${data.platforms.linkedin.engagement}</td></tr>\n        </table>\n      </div>\n      \n      ${data.anomalies.length > 0 ? `\n        <div class=\"alert alert-${data.anomalies.some(a => a.severity === 'high') ? 'danger' : 'warning'}\">\n          <h3>⚠️ Anomalies Détectées</h3>\n          <ul>\n            ${data.anomalies.map(anomaly => `<li><strong>${anomaly.type}:</strong> ${anomaly.message}</li>`).join('')}\n          </ul>\n        </div>\n      ` : '<div class=\"alert alert-success\"><h3>✅ Aucune anomalie détectée</h3></div>'}\n      \n      <div class=\"recommendations\">\n        <h3>💡 Recommandations</h3>\n        <ul>\n          ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}\n        </ul>\n      </div>\n      \n      <div style=\"margin-top: 40px; text-align: center; color: #666; font-size: 12px;\">\n        <p>Rapport généré automatiquement par ActivePieces Social Analytics - ${new Date().toISOString()}</p>\n      </div>\n    </body>\n    </html>\n  `;\n  \n  return {\n    htmlReport,\n    fileName: `social_analytics_report_${data.dateRange.start.replace(/-/g, '')}.html`,\n    summary: {\n      score: data.performance_score,\n      total_impressions: data.totals.impressions,\n      total_engagement: data.totals.engagement,\n      anomalies_count: data.anomalies.length,\n      top_platform: getBestPlatform(data.platforms)\n    }\n  };\n  \n  function getBestPlatform(platforms) {\n    let best = { name: '', score: 0 };\n    \n    Object.entries(platforms).forEach(([name, metrics]) => {\n      const score = metrics.engagement + metrics.impressions;\n      if (score > best.score) {\n        best = { name, score };\n      }\n    });\n    \n    return best.name;\n  }\n};"
+        },
+        "nextAction": "save_report_drive"
+      },
+      {
+        "name": "save_report_drive",
+        "displayName": "Save Report to Google Drive",
+        "type": "@activepieces/piece-google-drive",
+        "settings": {
+          "parent_folder": "{{connections.google_drive.reports_folder_id}}",
+          "file_name": "{{generate_pdf_report.fileName}}",
+          "file_content": "{{generate_pdf_report.htmlReport}}",
+          "mime_type": "text/html"
+        },
+        "nextAction": "final_notification"
+      },
+      {
+        "name": "final_notification",
+        "displayName": "Send Final Notification",
+        "type": "@activepieces/piece-discord",
+        "settings": {
+          "webhook_url": "{{connections.discord.analytics_webhook}}",
+          "content": "📊 **Rapport Analytics Quotidien Généré**\n\n📈 **Score:** {{generate_pdf_report.summary.score}}/100\n🎯 **Meilleure plateforme:** {{generate_pdf_report.summary.top_platform}}\n📊 **Impressions:** {{generate_pdf_report.summary.total_impressions}}\n💬 **Engagement:** {{generate_pdf_report.summary.total_engagement}}\n\n⚠️ **Anomalies:** {{generate_pdf_report.summary.anomalies_count}}\n\n📁 [Rapport complet sauvegardé]({{save_report_drive.webViewLink}})",
+          "username": "Social Analytics Bot",
+          "avatar_url": "https://example.com/analytics-bot-avatar.png"
+        }
+      }
+    ]
+  }
