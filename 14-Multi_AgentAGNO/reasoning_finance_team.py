@@ -12,7 +12,12 @@ from agno.playground import Playground, serve_playground_app
 from dotenv import load_dotenv
 
 load_dotenv()
-OPENAI_KEY_API = os.getenv("OPENAI_API_KEY")
+# SÉCURITÉ: Utiliser les variables d'environnement
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("OPENAI_KEY_API")
+
+if not OPENAI_API_KEY:
+    print("ERREUR: Clé OpenAI manquante dans .env")
+    exit(1)
 
 MYSQL_HOST = os.getenv("MYSQL_HOST", "localhost")
 MYSQL_PORT = os.getenv("MYSQL_PORT", "3306")
@@ -45,7 +50,7 @@ if not test_mysql_connection():
     exit(1)
 
 memory = Memory(
-    model=OpenAIChat(api_key="OPENAI_API_KEY", id="gpt-4o"),
+    model=OpenAIChat(api_key=OPENAI_API_KEY, id="gpt-4o"),  # CORRECTION: Utiliser la variable
     db=PostgresMemoryDb(table_name="user_memories", db_url=db_url),
     delete_memories=False,
     clear_memories=False,
@@ -55,7 +60,7 @@ web_agent = Agent(
     name="Web Search Agent",
     role="Handle web search requests and general research",
     agent_id="web_agent",
-    model=OpenAIChat(api_key="OPENAI_API_KEY", id="gpt-4o"),
+    model=OpenAIChat(api_key=OPENAI_API_KEY, id="gpt-4o"),  # CORRECTION: Utiliser la variable
     tools=[DuckDuckGoTools()],
     storage=PostgresAgentStorage(db_url=db_url, table_name="web_agent_sessions"),
     memory=memory,
@@ -76,7 +81,7 @@ finance_agent = Agent(
     name="Finance Agent",
     role="Handle financial data requests and market analysis",
     agent_id="finance_agent",
-    model=OpenAIChat(api_key="OPENAI_API_KEY", id="gpt-4o"),
+    model=OpenAIChat(api_key=OPENAI_API_KEY, id="gpt-4o"),  # CORRECTION: Utiliser la variable
     tools=[YFinanceTools(
         stock_price=True,
         company_info=True,
@@ -105,7 +110,7 @@ reasoning_finance_team = Team(
     name="Reasoning Finance Team",
     mode="coordinate",
     team_id="reasoning_finance_team",
-    model=OpenAIChat(api_key="OPENAI_API_KEY", id="gpt-4o"),
+    model=OpenAIChat(api_key=OPENAI_API_KEY, id="gpt-4o"),  # CORRECTION: Utiliser la variable
     members=[web_agent, finance_agent],
     tools=[ReasoningTools(add_instructions=True)],
     instructions=[
