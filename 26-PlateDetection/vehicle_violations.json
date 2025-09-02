@@ -1,0 +1,122 @@
+[
+    {
+        "license_plate": "UA89 NJZ",
+        "crime": "Reckless driving through school zone",
+        "date": "2024-09-01",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 750
+    },
+    {
+        "license_plate": "FU59 TFI",
+        "crime": "Excessive speeding - 35 mph over limit",
+        "date": "2024-11-18",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 500
+    },
+    {
+        "license_plate": "GX15 OCJ",
+        "crime": "Vehicle theft - reported stolen",
+        "date": "2023-10-15",
+        "severity": "critical",
+        "location": "A40 Highway Mile Marker 15",
+        "status": "active_warrant"
+    },
+    {
+        "license_plate": "SZ31 WWV",
+        "crime": "Red light violation with pedestrian endangerment",
+        "date": "2024-03-22",
+        "severity": "medium",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 300
+    },
+    {
+        "license_plate": "AX71 AAX",
+        "crime": "Driving without valid insurance",
+        "date": "2024-12-05",
+        "severity": "medium",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 400
+    },
+    {
+        "license_plate": "YF63 MRW",
+        "crime": "Hit and run - property damage",
+        "date": "2025-01-10",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "status": "under_investigation"
+    },
+    {
+        "license_plate": "GL20 RGU",
+        "crime": "Unregistered vehicle operation",
+        "date": "2024-08-14",
+        "severity": "low",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 200
+    },
+    {
+        "license_plate": "KC48 LWT",
+        "crime": "Street racing participation",
+        "date": "2024-07-30",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 600
+    },
+    {
+        "license_plate": "TJ60 CEV",
+        "crime": "Armed robbery - getaway vehicle",
+        "date": "2023-12-08",
+        "severity": "critical",
+        "location": "A40 Highway Mile Marker 15",
+        "status": "active_warrant"
+    },
+    {
+        "license_plate": "OX47 ZOL",
+        "crime": "Drunk driving - 0.12% BAC",
+        "date": "2024-05-17",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 850
+    },
+    {
+        "license_plate": "NA13 NRU",
+        "crime": "Parking in disabled space without permit",
+        "date": "2024-10-22",
+        "severity": "low",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 150
+    },
+    {
+        "license_plate": "M151 VSU",
+        "crime": "Mobile phone use while driving",
+        "date": "2024-06-11",
+        "severity": "medium",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 250
+    },
+    {
+        "license_plate": "BD19 XYZ",
+        "crime": "Fraudulent license plates",
+        "date": "2023-11-03",
+        "severity": "high",
+        "location": "A40 Highway Mile Marker 15",
+        "status": "active_investigation"
+    },
+    {
+        "license_plate": "WE67 ABC",
+        "crime": "Failure to yield to emergency vehicle",
+        "date": "2024-02-28",
+        "severity": "medium",
+        "location": "A40 Highway Mile Marker 15",
+        "fine_amount": 320
+    },
+    {
+        "license_plate": "QR22 DEF",
+        "crime": "Drug trafficking - vehicle impounded",
+        "date": "2023-09-19",
+        "severity": "critical",
+        "location": "A40 Highway Mile Marker 15",
+        "status": "court_pending"
+    }
+]
