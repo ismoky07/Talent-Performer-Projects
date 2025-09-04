@@ -1,0 +1,684 @@
+{
+    "clients": [
+      {
+        "name": "Manuel Dupant",
+        "occupation": "Software Engineer",
+        "age": 34,
+        "income": 120000,
+        "expenses": 45000,
+        "debt": 15000,
+        "credit_score": 780,
+        "savings": 75000,
+        "investments": 50000,
+        "financial_goals": ["Retire by 55", "Buy a house in 5 years"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)", "Roth IRA"],
+        "time_horizon": 20,
+        "current_financial_products": ["Brokerage account", "High-yield savings"],
+        "marital_status": "Married",
+        "estate_plans": "Will in place",
+        "past_financial_decisions": ["Refinanced mortgage", "Maxed 401(k) contributions"],
+        "upcoming_expenses": ["Child's college tuition"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-02",
+            "summary": "Manuel discussed his investment strategy with his Relationship Manager, Anshu. He expressed interest in AI and Big Data sectors and wanted to ensure his investment portfolio was diversified."
+          },
+          {
+            "date": "2025-03-14",
+            "summary": "Manuel showed interest in Oklo Inc. stocks and asked Anshu to analyze their potential fit for his portfolio. Anshu agreed to research and provide an update in the next meeting."
+          }
+        ]
+      },
+      {
+        "name": "Sarah Chen",
+        "occupation": "Marketing Director",
+        "age": 42,
+        "income": 145000,
+        "expenses": 62000,
+        "debt": 8500,
+        "credit_score": 820,
+        "savings": 95000,
+        "investments": 180000,
+        "financial_goals": ["Early retirement at 58", "Children's education fund"],
+        "risk_tolerance": "Aggressive",
+        "tax_status": "Head of household",
+        "employment_status": "Full-time",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life", "Disability", "Umbrella"],
+        "retirement_plans": ["401(k)", "SEP-IRA"],
+        "time_horizon": 16,
+        "current_financial_products": ["Investment account", "529 plans"],
+        "marital_status": "Divorced",
+        "estate_plans": "Trust established",
+        "past_financial_decisions": ["Diversified into international markets", "Increased 401k contributions"],
+        "upcoming_expenses": ["Home renovation"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-15",
+            "summary": "Sarah reviewed her portfolio performance and discussed rebalancing strategies. She wants to increase exposure to growth stocks while maintaining some defensive positions."
+          },
+          {
+            "date": "2025-02-28",
+            "summary": "Discussed tax-loss harvesting opportunities and potential Roth conversion strategies. Sarah is interested in ESG investing options for her taxable account."
+          }
+        ]
+      },
+      {
+        "name": "David Rodriguez",
+        "occupation": "Physician",
+        "age": 38,
+        "income": 285000,
+        "expenses": 95000,
+        "debt": 45000,
+        "credit_score": 790,
+        "savings": 120000,
+        "investments": 320000,
+        "financial_goals": ["Financial independence by 50", "Real estate investment"],
+        "risk_tolerance": "Moderate-Aggressive",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Self-employed",
+        "dependents": 3,
+        "insurance_coverage": ["Health", "Life", "Disability", "Malpractice"],
+        "retirement_plans": ["SEP-IRA", "Backdoor Roth"],
+        "time_horizon": 12,
+        "current_financial_products": ["Brokerage account", "Real estate"],
+        "marital_status": "Married",
+        "estate_plans": "Will and trust established",
+        "past_financial_decisions": ["Purchased rental property", "Maximized retirement contributions"],
+        "upcoming_expenses": ["Practice expansion"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-22",
+            "summary": "David discussed tax optimization strategies for his medical practice. He's considering additional real estate investments and wants to explore REITs as an alternative."
+          },
+          {
+            "date": "2025-03-05",
+            "summary": "Reviewed practice expansion financing options. David is interested in alternative investments and private equity opportunities given his high income bracket."
+          }
+        ]
+      },
+      {
+        "name": "Jennifer Williams",
+        "occupation": "Financial Analyst",
+        "age": 29,
+        "income": 78000,
+        "expenses": 35000,
+        "debt": 25000,
+        "credit_score": 750,
+        "savings": 35000,
+        "investments": 28000,
+        "financial_goals": ["Pay off student loans", "Save for house down payment"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 25,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Single",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Started emergency fund", "Began 401k contributions"],
+        "upcoming_expenses": ["Graduate school"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-10",
+            "summary": "Jennifer wants to accelerate debt repayment while building her investment portfolio. We discussed balance between paying off loans vs investing."
+          },
+          {
+            "date": "2025-03-18",
+            "summary": "Explored options for graduate school funding. Jennifer is considering part-time programs to maintain income while advancing her education."
+          }
+        ]
+      },
+      {
+        "name": "Robert Johnson",
+        "occupation": "Retired Teacher",
+        "age": 67,
+        "income": 55000,
+        "expenses": 48000,
+        "debt": 0,
+        "credit_score": 800,
+        "savings": 45000,
+        "investments": 450000,
+        "financial_goals": ["Preserve wealth", "Leave inheritance"],
+        "risk_tolerance": "Conservative",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Retired",
+        "dependents": 0,
+        "insurance_coverage": ["Medicare", "Supplemental health", "Life"],
+        "retirement_plans": ["Pension", "IRA"],
+        "time_horizon": 5,
+        "current_financial_products": ["CD ladder", "Conservative portfolio"],
+        "marital_status": "Married",
+        "estate_plans": "Comprehensive estate plan",
+        "past_financial_decisions": ["Conservative asset allocation", "Paid off mortgage"],
+        "upcoming_expenses": ["Healthcare costs"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-08",
+            "summary": "Robert reviewed his withdrawal strategy and discussed required minimum distributions. He wants to minimize tax impact while preserving capital."
+          },
+          {
+            "date": "2025-02-25",
+            "summary": "Discussed healthcare cost planning and long-term care insurance options. Robert is considering adjusting his asset allocation slightly for inflation protection."
+          }
+        ]
+      },
+      {
+        "name": "Lisa Thompson",
+        "occupation": "Small Business Owner",
+        "age": 45,
+        "income": 165000,
+        "expenses": 78000,
+        "debt": 35000,
+        "credit_score": 775,
+        "savings": 68000,
+        "investments": 145000,
+        "financial_goals": ["Business expansion", "Retirement planning"],
+        "risk_tolerance": "Aggressive",
+        "tax_status": "Single",
+        "employment_status": "Self-employed",
+        "dependents": 1,
+        "insurance_coverage": ["Health", "Life", "Business"],
+        "retirement_plans": ["SEP-IRA", "Solo 401k"],
+        "time_horizon": 20,
+        "current_financial_products": ["Business accounts", "Investment portfolio"],
+        "marital_status": "Single",
+        "estate_plans": "Will in place",
+        "past_financial_decisions": ["Started business", "Established retirement accounts"],
+        "upcoming_expenses": ["Equipment purchase"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-30",
+            "summary": "Lisa discussed separating personal and business finances more clearly. She's interested in tax-advantaged retirement savings strategies for business owners."
+          },
+          {
+            "date": "2025-03-10",
+            "summary": "Explored business expansion financing options and discussed key person insurance. Lisa wants to diversify her investments beyond her business."
+          }
+        ]
+      },
+      {
+        "name": "Michael Brown",
+        "occupation": "Construction Manager",
+        "age": 52,
+        "income": 95000,
+        "expenses": 55000,
+        "debt": 18000,
+        "credit_score": 720,
+        "savings": 42000,
+        "investments": 85000,
+        "financial_goals": ["Catch-up retirement savings", "Pay off debt"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 1,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)", "IRA"],
+        "time_horizon": 13,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Married",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Late start on retirement savings", "Prioritized children's education"],
+        "upcoming_expenses": ["Last child's college"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-05",
+            "summary": "Michael is utilizing catch-up contributions and wants to accelerate retirement savings. We discussed debt payoff vs investment prioritization."
+          },
+          {
+            "date": "2025-03-20",
+            "summary": "Reviewed social security benefits and pension options. Michael is considering working a few extra years to maximize retirement security."
+          }
+        ]
+      },
+      {
+        "name": "Amanda Davis",
+        "occupation": "Nurse Practitioner",
+        "age": 36,
+        "income": 110000,
+        "expenses": 52000,
+        "debt": 22000,
+        "credit_score": 785,
+        "savings": 58000,
+        "investments": 72000,
+        "financial_goals": ["Student loan payoff", "Home purchase"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["403(b)", "IRA"],
+        "time_horizon": 29,
+        "current_financial_products": ["High-yield savings", "403b"],
+        "marital_status": "Single",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Aggressive student loan payments", "Started emergency fund"],
+        "upcoming_expenses": ["Home down payment"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-25",
+            "summary": "Amanda is balancing student loan payoff with home savings goals. We discussed the math between paying loans vs investing the difference."
+          },
+          {
+            "date": "2025-03-08",
+            "summary": "Explored first-time homebuyer programs and discussed mortgage pre-approval process. Amanda wants to maintain retirement contributions while saving for a house."
+          }
+        ]
+      },
+      {
+        "name": "James Wilson",
+        "occupation": "Sales Manager",
+        "age": 41,
+        "income": 135000,
+        "expenses": 68000,
+        "debt": 12000,
+        "credit_score": 760,
+        "savings": 48000,
+        "investments": 125000,
+        "financial_goals": ["Children's education", "Retirement at 62"],
+        "risk_tolerance": "Moderate-Aggressive",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)", "Roth IRA"],
+        "time_horizon": 21,
+        "current_financial_products": ["529 plans", "Brokerage account"],
+        "marital_status": "Married",
+        "estate_plans": "Will in place",
+        "past_financial_decisions": ["Started 529 plans early", "Consistent 401k contributions"],
+        "upcoming_expenses": ["Family vacation"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-12",
+            "summary": "James reviewed 529 plan performance and discussed college cost projections. He's interested in balancing education funding with his own retirement needs."
+          },
+          {
+            "date": "2025-03-15",
+            "summary": "Discussed variable compensation investment strategies. James wants to optimize his bonus allocations between savings, investments, and debt payoff."
+          }
+        ]
+      },
+      {
+        "name": "Patricia Garcia",
+        "occupation": "HR Director",
+        "age": 48,
+        "income": 125000,
+        "expenses": 63000,
+        "debt": 8000,
+        "credit_score": 810,
+        "savings": 78000,
+        "investments": 198000,
+        "financial_goals": ["Early retirement", "Travel fund"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Divorced",
+        "employment_status": "Full-time",
+        "dependents": 1,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)", "IRA"],
+        "time_horizon": 12,
+        "current_financial_products": ["Investment portfolio", "High-yield savings"],
+        "marital_status": "Divorced",
+        "estate_plans": "Updated after divorce",
+        "past_financial_decisions": ["Divorce settlement invested wisely", "Increased retirement contributions"],
+        "upcoming_expenses": ["Child's wedding"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-18",
+            "summary": "Patricia discussed early retirement feasibility and withdrawal strategies. She's interested in geographic arbitrage and part-time work options."
+          },
+          {
+            "date": "2025-03-02",
+            "summary": "Reviewed health insurance options for early retirement. Patricia wants to build a larger cash cushion before making the transition."
+          }
+        ]
+      },
+      {
+        "name": "Christopher Lee",
+        "occupation": "Software Architect",
+        "age": 39,
+        "income": 155000,
+        "expenses": 58000,
+        "debt": 28000,
+        "credit_score": 795,
+        "savings": 85000,
+        "investments": 165000,
+        "financial_goals": ["Tech startup investment", "Financial independence"],
+        "risk_tolerance": "Aggressive",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)", "Roth IRA"],
+        "time_horizon": 26,
+        "current_financial_products": ["Tech-heavy portfolio", "Cryptocurrency"],
+        "marital_status": "Single",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Heavy tech stock allocation", "Early cryptocurrency adoption"],
+        "upcoming_expenses": ["Startup investment"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-08",
+            "summary": "Christopher discussed his concentrated tech position and the need for diversification. He's interested in alternative investments and startup opportunities."
+          },
+          {
+            "date": "2025-03-22",
+            "summary": "Explored angel investing and venture capital opportunities. Christopher wants to balance his risk-taking with more traditional retirement planning."
+          }
+        ]
+      },
+      {
+        "name": "Michelle Martinez",
+        "occupation": "Pharmacist",
+        "age": 33,
+        "income": 125000,
+        "expenses": 48000,
+        "debt": 65000,
+        "credit_score": 740,
+        "savings": 38000,
+        "investments": 45000,
+        "financial_goals": ["Student loan elimination", "Home ownership"],
+        "risk_tolerance": "Conservative-Moderate",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 1,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 32,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Married",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Focused on debt repayment", "Started emergency fund"],
+        "upcoming_expenses": ["Second child expenses"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-28",
+            "summary": "Michelle is prioritizing student loan payoff but wants to start investing more. We discussed the balance between debt elimination and wealth building."
+          },
+          {
+            "date": "2025-03-12",
+            "summary": "Discussed childcare costs and family financial planning. Michelle wants to optimize her 401k contributions and explore 529 plan options."
+          }
+        ]
+      },
+      {
+        "name": "Kevin Anderson",
+        "occupation": "Police Officer",
+        "age": 44,
+        "income": 72000,
+        "expenses": 45000,
+        "debt": 15000,
+        "credit_score": 730,
+        "savings": 28000,
+        "investments": 65000,
+        "financial_goals": ["Pension maximization", "Second career prep"],
+        "risk_tolerance": "Conservative",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["Pension", "457(b)"],
+        "time_horizon": 6,
+        "current_financial_products": ["Pension plan", "457b"],
+        "marital_status": "Married",
+        "estate_plans": "Will in place",
+        "past_financial_decisions": ["Consistent pension contributions", "Conservative investments"],
+        "upcoming_expenses": ["Children's activities"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-15",
+            "summary": "Kevin discussed pension optimization strategies and second career planning. He's interested in skills training and part-time work options after retirement."
+          },
+          {
+            "date": "2025-03-25",
+            "summary": "Reviewed social security coordination with pension benefits. Kevin wants to explore additional retirement savings options beyond his pension."
+          }
+        ]
+      },
+      {
+        "name": "Rachel Taylor",
+        "occupation": "Veterinarian",
+        "age": 37,
+        "income": 98000,
+        "expenses": 54000,
+        "debt": 85000,
+        "credit_score": 720,
+        "savings": 22000,
+        "investments": 35000,
+        "financial_goals": ["Practice ownership", "Debt reduction"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life", "Disability", "Malpractice"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 28,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Single",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Veterinary school loans", "Started practice employment"],
+        "upcoming_expenses": ["Practice purchase"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-20",
+            "summary": "Rachel discussed practice ownership financing and the impact on her personal finances. She wants to balance business investment with debt reduction."
+          },
+          {
+            "date": "2025-03-06",
+            "summary": "Explored business loan options and personal guarantee implications. Rachel is interested in disability insurance specifically for veterinarians."
+          }
+        ]
+      },
+      {
+        "name": "Daniel White",
+        "occupation": "Electrician",
+        "age": 35,
+        "income": 68000,
+        "expenses": 42000,
+        "debt": 12000,
+        "credit_score": 710,
+        "savings": 18000,
+        "investments": 25000,
+        "financial_goals": ["Start contracting business", "Buy work truck"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 3,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["IRA"],
+        "time_horizon": 30,
+        "current_financial_products": ["Savings account", "IRA"],
+        "marital_status": "Married",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Trade school investment", "Started family early"],
+        "upcoming_expenses": ["Business startup costs"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-18",
+            "summary": "Daniel discussed transitioning from employee to contractor. He needs guidance on business financing and personal financial protection during the transition."
+          },
+          {
+            "date": "2025-03-28",
+            "summary": "Explored business insurance needs and retirement planning for self-employed individuals. Daniel wants to establish SEP-IRA once his business is running."
+          }
+        ]
+      },
+      {
+        "name": "Stephanie Clark",
+        "occupation": "Real Estate Agent",
+        "age": 43,
+        "income": 89000,
+        "expenses": 51000,
+        "debt": 18000,
+        "credit_score": 745,
+        "savings": 32000,
+        "investments": 58000,
+        "financial_goals": ["Income stabilization", "Investment property"],
+        "risk_tolerance": "Moderate-Aggressive",
+        "tax_status": "Single",
+        "employment_status": "Self-employed",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["SEP-IRA"],
+        "time_horizon": 22,
+        "current_financial_products": ["Variable income planning", "SEP-IRA"],
+        "marital_status": "Divorced",
+        "estate_plans": "Will in place",
+        "past_financial_decisions": ["Variable income management", "Real estate knowledge advantage"],
+        "upcoming_expenses": ["Marketing investment"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-12",
+            "summary": "Stephanie discussed managing variable income and building financial stability. She's interested in real estate investment opportunities using her industry knowledge."
+          },
+          {
+            "date": "2025-03-01",
+            "summary": "Explored investment property financing and tax implications. Stephanie wants to diversify beyond real estate while leveraging her expertise."
+          }
+        ]
+      },
+      {
+        "name": "Thomas Harris",
+        "occupation": "College Professor",
+        "age": 51,
+        "income": 78000,
+        "expenses": 48000,
+        "debt": 5000,
+        "credit_score": 780,
+        "savings": 45000,
+        "investments": 185000,
+        "financial_goals": ["Sabbatical funding", "Retirement security"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 1,
+        "insurance_coverage": ["Health", "Life", "Disability"],
+        "retirement_plans": ["403(b)", "Pension"],
+        "time_horizon": 14,
+        "current_financial_products": ["403b", "Pension plan"],
+        "marital_status": "Married",
+        "estate_plans": "Will and trust",
+        "past_financial_decisions": ["Consistent retirement savings", "Academic career choice"],
+        "upcoming_expenses": ["Sabbatical year"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-22",
+            "summary": "Thomas discussed sabbatical funding strategies and temporary income reduction planning. He wants to optimize his academic benefits and retirement timeline."
+          },
+          {
+            "date": "2025-03-16",
+            "summary": "Explored pension maximization and social security optimization for educators. Thomas is interested in post-retirement teaching and consulting opportunities."
+          }
+        ]
+      },
+      {
+        "name": "Nicole Robinson",
+        "occupation": "Dental Hygienist",
+        "age": 31,
+        "income": 65000,
+        "expenses": 38000,
+        "debt": 15000,
+        "credit_score": 735,
+        "savings": 24000,
+        "investments": 18000,
+        "financial_goals": ["Emergency fund completion", "First home purchase"],
+        "risk_tolerance": "Conservative-Moderate",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 34,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Single",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Steady savings habit", "Conservative approach"],
+        "upcoming_expenses": ["Home down payment"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-31",
+            "summary": "Nicole is building her emergency fund and saving for a home purchase. We discussed timeline coordination and investment allocation during the savings phase."
+          },
+          {
+            "date": "2025-03-19",
+            "summary": "Reviewed first-time homebuyer programs and mortgage options. Nicole wants to increase her 401k contribution after completing her emergency fund goal."
+          }
+        ]
+      },
+      {
+        "name": "Brian Lewis",
+        "occupation": "Mechanic",
+        "age": 46,
+        "income": 58000,
+        "expenses": 41000,
+        "debt": 22000,
+        "credit_score": 685,
+        "savings": 8000,
+        "investments": 15000,
+        "financial_goals": ["Debt elimination", "Retirement catch-up"],
+        "risk_tolerance": "Conservative",
+        "tax_status": "Married filing jointly",
+        "employment_status": "Full-time",
+        "dependents": 2,
+        "insurance_coverage": ["Health", "Life"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 19,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Married",
+        "estate_plans": "Basic will",
+        "past_financial_decisions": ["Late start on savings", "Focus on family needs"],
+        "upcoming_expenses": ["Car repair equipment"],
+        "meeting_notes": [
+          {
+            "date": "2025-02-26",
+            "summary": "Brian discussed debt consolidation options and retirement catch-up strategies. He wants to balance debt payoff with building his retirement savings."
+          },
+          {
+            "date": "2025-03-30",
+            "summary": "Explored side income opportunities using his mechanical skills. Brian is interested in learning about catch-up contributions and maximizing employer matching."
+          }
+        ]
+      },
+      {
+        "name": "Catherine Moore",
+        "occupation": "Graphic Designer",
+        "age": 28,
+        "income": 52000,
+        "expenses": 34000,
+        "debt": 18000,
+        "credit_score": 715,
+        "savings": 15000,
+        "investments": 8000,
+        "financial_goals": ["Student loan payoff", "Creative business launch"],
+        "risk_tolerance": "Moderate",
+        "tax_status": "Single",
+        "employment_status": "Full-time",
+        "dependents": 0,
+        "insurance_coverage": ["Health", "Life"],
+        "retirement_plans": ["401(k)"],
+        "time_horizon": 37,
+        "current_financial_products": ["Savings account", "401k"],
+        "marital_status": "Single",
+        "estate_plans": "None",
+        "past_financial_decisions": ["Art school investment", "Started 401k early"],
+        "upcoming_expenses": ["Business equipment"],
+        "meeting_notes": [
+          {
+            "date": "2025-01-16",
+            "summary": "Catherine discussed balancing student loan payments with business startup goals. She's interested in freelance income strategies and business structure options."
+          },
+          {
+            "date": "2025-03-04",
+            "summary": "Explored creative industry retirement planning and irregular income management. Catherine wants to establish a business emergency fund alongside personal savings."
+          }
+        ]
+      }
+    ]
+  }
