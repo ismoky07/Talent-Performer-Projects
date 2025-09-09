@@ -1,2 +1,3 @@
 .env
 Dockerfile
+client_secret.json
